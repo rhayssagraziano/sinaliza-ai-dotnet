@@ -1,3 +1,5 @@
+![Sinaliza.ai · API .NET de abrigos e rotas de evacuação](assets/banner.svg)
+
 # Sinaliza.ai · Abrigos e Rotas de Evacuação (API .NET)
 
 Global Solution 2026/2 · FIAP · 2º ano de Análise e Desenvolvimento de Sistemas
@@ -45,6 +47,7 @@ Um **ABRIGO** tem várias **ROTA_EVACUACAO** (relação **1:N**). Ao apagar um a
 apagadas junto (`ON DELETE CASCADE`).
 
 ```mermaid
+%%{init: {'theme':'base','themeVariables':{'primaryColor':'#F7D9FC','primaryTextColor':'#25104D','primaryBorderColor':'#C2286B','lineColor':'#5B1C2E','textColor':'#25104D','attributeBackgroundColorOdd':'#FFFFFF','attributeBackgroundColorEven':'#F7D9FC','fontFamily':'Segoe UI, Arial, sans-serif'}}}%%
 erDiagram
     ABRIGO ||--o{ ROTA_EVACUACAO : "tem"
     ABRIGO {

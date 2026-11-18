@@ -9,6 +9,7 @@ namespace CitizenTech.Abrigos.Controllers;
 
 [ApiController]
 [Route("api/abrigos")]
+[Tags("Abrigos")]
 [Produces("application/json")]
 public class AbrigosController : ControllerBase
 {

@@ -9,6 +9,7 @@ namespace CitizenTech.Abrigos.Controllers;
 
 [ApiController]
 [Route("api/rotas-evacuacao")]
+[Tags("Rotas de evacuação")]
 [Produces("application/json")]
 public class RotasEvacuacaoController : ControllerBase
 {

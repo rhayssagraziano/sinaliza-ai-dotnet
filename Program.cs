@@ -54,7 +54,16 @@ builder.Services
     });
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(swagger =>
+{
+    swagger.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+    {
+        Title = "Sinaliza.ai · Abrigos e Rotas de Evacuação",
+        Version = "v1",
+        Description = "API da solução Sinaliza.ai (Global Solution FIAP 2026/2 · CitizenTech): " +
+                      "abrigos para enchentes e as rotas seguras até eles.",
+    });
+});
 
 var app = builder.Build();
 
@@ -77,8 +86,15 @@ app.UseExceptionHandler(erroApp => erroApp.Run(async context =>
 }));
 
 // Swagger fica ligado em todos os ambientes para facilitar o teste (inclusive no container).
+// O visual segue a paleta da Sinaliza.ai (wwwroot/css/sinaliza-swagger.css).
+app.UseStaticFiles();
 app.UseSwagger();
-app.UseSwaggerUI();
+app.UseSwaggerUI(ui =>
+{
+    ui.DocumentTitle = "Sinaliza.ai · API";
+    ui.SwaggerEndpoint("/swagger/v1/swagger.json", "Sinaliza.ai v1");
+    ui.InjectStylesheet("/css/sinaliza-swagger.css");
+});
 
 app.MapControllers();
 
