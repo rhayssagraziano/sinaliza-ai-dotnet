@@ -1,3 +1,4 @@
+using System.Text.Json;
 using CitizenTech.Abrigos.Data;
 using CitizenTech.Abrigos.Erros;
 using Microsoft.AspNetCore.Mvc;
@@ -28,10 +29,23 @@ builder.Services
         // Dado inválido (Data Annotations) -> 400 no mesmo formato JSON dos outros erros.
         options.InvalidModelStateResponseFactory = context =>
         {
+            // Corpo que nem é JSON (ex.: falta uma aspa): uma mensagem só, em português.
+            if (context.ModelState.Keys.Any(campo => campo.StartsWith('$')))
+            {
+                return new BadRequestObjectResult(new ErroResponse(
+                    StatusCodes.Status400BadRequest,
+                    "Dados inválidos.",
+                    new Dictionary<string, string[]>
+                    {
+                        ["corpo"] = new[] { "O corpo da requisição não é um JSON válido." },
+                    }));
+            }
+
             var detalhes = context.ModelState
                 .Where(campo => campo.Value?.Errors.Count > 0)
                 .ToDictionary(
-                    campo => campo.Key,
+                    // "Uf" -> "uf": mesmo nome do campo no JSON.
+                    campo => JsonNamingPolicy.CamelCase.ConvertName(campo.Key),
                     campo => campo.Value!.Errors.Select(e => e.ErrorMessage).ToArray());
 
             return new BadRequestObjectResult(

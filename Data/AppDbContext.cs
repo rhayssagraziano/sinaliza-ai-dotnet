@@ -1,5 +1,6 @@
 using CitizenTech.Abrigos.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace CitizenTech.Abrigos.Data;
 
@@ -12,6 +13,20 @@ public class AppDbContext : DbContext
     public DbSet<Abrigo> Abrigos => Set<Abrigo>();
 
     public DbSet<RotaEvacuacao> RotasEvacuacao => Set<RotaEvacuacao>();
+
+    protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+    {
+        // Datas são gravadas em UTC; ao ler de volta, marca como UTC para o JSON sair com "Z".
+        configurationBuilder.Properties<DateTime>().HaveConversion<DataUtcConverter>();
+    }
+
+    private sealed class DataUtcConverter : ValueConverter<DateTime, DateTime>
+    {
+        public DataUtcConverter()
+            : base(v => v, v => DateTime.SpecifyKind(v, DateTimeKind.Utc))
+        {
+        }
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
