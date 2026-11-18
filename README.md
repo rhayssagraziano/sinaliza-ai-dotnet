@@ -15,15 +15,25 @@ Disciplina: **Advanced Business Development with .NET**
 
 ## A solução
 
-**Problema.** Com o El Niño, a previsão é de chuva acima do normal até janeiro, com enchentes nas cidades.
-Quando a água sobe, quem mais sofre para sair de casa a tempo são idosos, pessoas com deficiência e
-moradores de áreas de risco, que muitas vezes não sabem **para onde ir** nem **por qual caminho seguro**.
+**Problema.** O semáforo comum trata todo mundo igual: idosos e pessoas com deficiência não conseguem
+atravessar no tempo do verde, e o ciclo não muda quando a rua alaga. Com o El Niño, a previsão é de chuva
+acima do normal, com enchentes nas cidades. Quando é preciso sair de casa, muita gente não sabe **para onde
+ir** nem **por qual caminho seguro**.
 
-**Solução do grupo: Sinaliza.ai.** Um semáforo inteligente com *modo enchente*: um sensor mede o nível da água no
-cruzamento, alertas da Defesa Civil mudam o modo do semáforo e, na evacuação, os semáforos abrem em
-sequência (*onda verde*) até o abrigo mais próximo. O app avisa o cidadão e mostra a rota.
+**Solução do grupo: Sinaliza.ai.** Um semáforo inteligente de travessia que **prioriza o pedestre** e muda de
+modo conforme o risco climático. O risco vem de três fontes: a previsão do El Niño (contexto), os alertas
+oficiais da Defesa Civil e um sensor de nível de água no próprio cruzamento.
 
-**Esta API** é a parte da solução que cuida dos **abrigos** e das **rotas de evacuação**:
+| Modo | Gatilho | O que o semáforo faz |
+|---|---|---|
+| `NORMAL` | nenhum | o pedestre parado na faixa pede a travessia; verde mínimo para os carros |
+| `ATENCAO` | alerta amarelo ou chuva forte prevista | espera menor para o pedestre e travessia mais longa |
+| `ALAGAMENTO` | sensor acima do limite | amarelo piscante, buzzer e travessia bloqueada; o app sugere outra rota |
+| `EVACUACAO` | alerta severo da Defesa Civil | onda verde em sequência **até o abrigo** |
+
+A câmera só **conta** pessoas e veículos: não há reconhecimento facial e nenhuma imagem é guardada.
+
+**Esta API** é a parte da solução que cuida do modo `EVACUACAO`: os **abrigos** e as **rotas de evacuação**:
 
 - cadastra os abrigos (escola, ginásio...) com capacidade, ocupação atual e acessibilidade;
 - cadastra as rotas seguras de cada cruzamento até um abrigo, marcando as acessíveis (sem escada,
@@ -31,8 +41,11 @@ sequência (*onda verde*) até o abrigo mais próximo. O app avisa o cidadão e 
 - responde ao app quais abrigos ainda têm vaga (`GET /api/abrigos?apenasComVagas=true`) e quais rotas
   acessíveis levam até eles (`GET /api/rotas-evacuacao?apenasAcessiveis=true`).
 
-**Cidadão beneficiado:** moradores de áreas de risco de enchente, em especial idosos e pessoas com deficiência.
-**ODS:** 11 (cidades sustentáveis), 13 (ação contra a mudança do clima), 10 (redução das desigualdades), 3 (saúde e bem-estar).
+**Cidadão beneficiado:** pedestres, em especial idosos e pessoas com deficiência, que precisam de mais tempo
+de travessia e de rotas sem escada; motoristas; e moradores de áreas sujeitas a alagamento.
+
+**ODS:** 11 (cidades e comunidades sustentáveis), 13 (ação contra a mudança global do clima),
+9 (indústria, inovação e infraestrutura) e 3 (saúde e bem-estar, pela segurança viária).
 
 ## Tecnologias
 
@@ -44,38 +57,10 @@ sequência (*onda verde*) até o abrigo mais próximo. O app avisa o cidadão e 
 ## Modelo de dados
 
 Um **ABRIGO** tem várias **ROTA_EVACUACAO** (relação **1:N**). Ao apagar um abrigo, as rotas dele são
-apagadas junto (`ON DELETE CASCADE`).
+apagadas junto (`ON DELETE CASCADE`). As regras de capacidade, distância e tempo também são `CHECK`
+constraints no banco.
 
-```mermaid
-%%{init: {'theme':'base','themeVariables':{'primaryColor':'#F7D9FC','primaryTextColor':'#25104D','primaryBorderColor':'#C2286B','lineColor':'#5B1C2E','textColor':'#25104D','attributeBackgroundColorOdd':'#FFFFFF','attributeBackgroundColorEven':'#F7D9FC','fontFamily':'Segoe UI, Arial, sans-serif'}}}%%
-erDiagram
-    ABRIGO ||--o{ ROTA_EVACUACAO : "tem"
-    ABRIGO {
-        NUMBER ID_ABRIGO PK
-        NVARCHAR2 NOME
-        NVARCHAR2 ENDERECO
-        NVARCHAR2 BAIRRO
-        NVARCHAR2 MUNICIPIO
-        NCHAR UF
-        NUMBER CAPACIDADE "CHECK > 0"
-        NUMBER OCUPACAO_ATUAL "CHECK 0..CAPACIDADE"
-        NUMBER ACESSIVEL "0 ou 1"
-        NUMBER ATIVO "0 ou 1"
-        NVARCHAR2 TELEFONE "opcional"
-        TIMESTAMP CRIADO_EM "UTC"
-    }
-    ROTA_EVACUACAO {
-        NUMBER ID_ROTA PK
-        NUMBER ID_ABRIGO FK
-        NVARCHAR2 PONTO_PARTIDA
-        NVARCHAR2 TRAJETO
-        NUMBER DISTANCIA_METROS "CHECK > 0"
-        NUMBER TEMPO_ESTIMADO_MIN "CHECK > 0"
-        NUMBER ACESSIVEL "0 ou 1"
-        NUMBER ATIVA "0 ou 1"
-        TIMESTAMP CRIADO_EM "UTC"
-    }
-```
+![Diagrama de entidades: ABRIGO 1:N ROTA_EVACUACAO](assets/diagrama-entidades.svg)
 
 ## Estrutura do projeto
 
@@ -200,13 +185,20 @@ para ver os registros, a relação 1:N e as constraints.
 
 ## Relação com as outras entregas
 
+- **Java (API principal):** cuida dos cruzamentos, leituras e alertas e decide o modo do semáforo. Quando o
+  modo vira `EVACUACAO`, o app busca nesta API o abrigo e a rota.
 - **Mobile (Flutter):** o app mostra ao cidadão os abrigos com vaga e as rotas acessíveis.
-- **DevOps:** esta API pode ser a aplicação que roda em container na VM Azure. A connection string
-  entra pela variável de ambiente `ConnectionStrings__Oracle`.
-- **Banco (PL/SQL):** os cruzamentos, alertas e leituras do sensor ficam em outras tabelas do mesmo modelo.
+- **DevOps:** o professor aceita a API em Java ou .NET no container da VM Azure. Se esta for a escolhida,
+  a connection string entra pela variável de ambiente `ConnectionStrings__Oracle`.
+- **Banco (PL/SQL):** os cruzamentos, alertas, parâmetros dos modos e leituras do sensor ficam em outras
+  tabelas do mesmo modelo, no mesmo usuário Oracle (os nomes não se repetem).
 
 ## Uso de IA generativa
 
-- **Claude Code (Anthropic):** apoio para montar a estrutura inicial do projeto, sugerir o mapeamento do
-  EF Core para o Oracle e escrever o README. Todo o código foi revisado, executado e testado pelo grupo,
-  que sabe explicar cada parte (rota, controller, DbContext e resposta HTTP).
+Ferramentas de IA generativa foram usadas como apoio:
+
+- **Claude Code (Anthropic):** montar a estrutura inicial do projeto, sugerir o mapeamento do EF Core para
+  o Oracle, testar as rotas e escrever o README e o diagrama.
+
+Todo o código e o texto foram lidos, entendidos e revisados pelos integrantes, que sabem explicar cada
+parte (rota, controller, DbContext e resposta HTTP).
