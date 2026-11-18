@@ -7,11 +7,9 @@ Disciplina: **Advanced Business Development with .NET**
 
 ## Integrantes
 
-| Nome | RM | Turma |
-|---|---|---|
-| _preencher_ | RM_____ | _____ |
-| _preencher_ | RM_____ | _____ |
-| _preencher_ | RM_____ | _____ |
+- Julia Valerio Guimarães da Silva
+- Rhayssa Graziano Bernardes e Rocha Ferreira
+- Ruan Lima da Silva
 
 ## A solução
 
