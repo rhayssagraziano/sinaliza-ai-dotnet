@@ -1,4 +1,4 @@
-# CitizenTech · Abrigos e Rotas de Evacuação (API .NET)
+# Sinaliza.ai · Abrigos e Rotas de Evacuação (API .NET)
 
 Global Solution 2026/2 · FIAP · 2º ano de Análise e Desenvolvimento de Sistemas
 Disciplina: **Advanced Business Development with .NET**
@@ -17,7 +17,7 @@ Disciplina: **Advanced Business Development with .NET**
 Quando a água sobe, quem mais sofre para sair de casa a tempo são idosos, pessoas com deficiência e
 moradores de áreas de risco, que muitas vezes não sabem **para onde ir** nem **por qual caminho seguro**.
 
-**Solução do grupo.** Um semáforo inteligente com *modo enchente*: um sensor mede o nível da água no
+**Solução do grupo: Sinaliza.ai.** Um semáforo inteligente com *modo enchente*: um sensor mede o nível da água no
 cruzamento, alertas da Defesa Civil mudam o modo do semáforo e, na evacuação, os semáforos abrem em
 sequência (*onda verde*) até o abrigo mais próximo. O app avisa o cidadão e mostra a rota.
 
@@ -97,8 +97,8 @@ CitizenTech.Abrigos.http   todas as requisições de teste, prontas
 ### 2. Baixar e restaurar
 
 ```bash
-git clone <URL_DESTE_REPOSITORIO>
-cd citizentech-dotnet
+git clone https://github.com/rhayssagraziano/sinaliza-ai-dotnet.git
+cd sinaliza-ai-dotnet
 dotnet tool restore      # instala o dotnet-ef 8 deste projeto (dotnet-tools.json)
 ```
 
