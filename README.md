@@ -190,13 +190,3 @@ para ver os registros, a relação 1:N e as constraints.
   a connection string entra pela variável de ambiente `ConnectionStrings__Oracle`.
 - **Banco (PL/SQL):** os cruzamentos, alertas, parâmetros dos modos e leituras do sensor ficam em outras
   tabelas do mesmo modelo, no mesmo usuário Oracle (os nomes não se repetem).
-
-## Uso de IA generativa
-
-Ferramentas de IA generativa foram usadas como apoio:
-
-- **Claude Code (Anthropic):** montar a estrutura inicial do projeto, sugerir o mapeamento do EF Core para
-  o Oracle, testar as rotas e escrever o README e o diagrama.
-
-Todo o código e o texto foram lidos, entendidos e revisados pelos integrantes, que sabem explicar cada
-parte (rota, controller, DbContext e resposta HTTP).
