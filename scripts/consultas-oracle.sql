@@ -1,0 +1,27 @@
+-- Consultas para conferir no Oracle (SQL Developer) o que a API gravou.
+-- Use no vídeo, depois de fazer o CRUD pelo Swagger.
+
+-- Tabelas criadas pela Migration
+SELECT TABLE_NAME FROM USER_TABLES
+ WHERE TABLE_NAME IN ('ABRIGO', 'ROTA_EVACUACAO', '__EFMigrationsHistory')
+ ORDER BY TABLE_NAME;
+
+-- Migrations aplicadas
+SELECT * FROM "__EFMigrationsHistory";
+
+-- Registros
+SELECT * FROM ABRIGO ORDER BY ID_ABRIGO;
+SELECT * FROM ROTA_EVACUACAO ORDER BY ID_ROTA;
+
+-- Relação 1:N: cada abrigo com as suas rotas
+SELECT a.ID_ABRIGO, a.NOME AS ABRIGO, r.ID_ROTA, r.PONTO_PARTIDA, r.TEMPO_ESTIMADO_MIN
+  FROM ABRIGO a
+  LEFT JOIN ROTA_EVACUACAO r ON r.ID_ABRIGO = a.ID_ABRIGO
+ ORDER BY a.ID_ABRIGO, r.TEMPO_ESTIMADO_MIN;
+
+-- Chaves e regras (PK, FK, CHECK) criadas pela Migration
+SELECT TABLE_NAME, CONSTRAINT_NAME, CONSTRAINT_TYPE
+  FROM USER_CONSTRAINTS
+ WHERE TABLE_NAME IN ('ABRIGO', 'ROTA_EVACUACAO')
+   AND CONSTRAINT_NAME NOT LIKE 'SYS%'
+ ORDER BY TABLE_NAME, CONSTRAINT_NAME;

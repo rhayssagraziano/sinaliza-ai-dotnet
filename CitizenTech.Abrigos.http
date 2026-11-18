@@ -1,0 +1,129 @@
+# Testes da API. No VS Code, instale a extensão "REST Client" e clique em "Send Request"
+# acima de cada chamada. No Visual Studio / Rider o arquivo .http funciona direto.
+@base = http://localhost:5080/api
+
+### 1. Cadastrar abrigo (201)
+POST {{base}}/abrigos
+Content-Type: application/json
+
+{
+  "nome": "EMEF Exemplo do Centro",
+  "endereco": "Rua Exemplo, 100",
+  "bairro": "Centro",
+  "municipio": "São Paulo",
+  "uf": "SP",
+  "capacidade": 250,
+  "ocupacaoAtual": 40,
+  "acessivel": true,
+  "ativo": true,
+  "telefone": "(11) 5555-0100"
+}
+
+### 2. Cadastrar rota de evacuação para o abrigo 1 (201)
+POST {{base}}/rotas-evacuacao
+Content-Type: application/json
+
+{
+  "abrigoId": 1,
+  "pontoPartida": "Av. do Estado x Rua Mauá",
+  "trajeto": "Rua Mauá até a Rua Exemplo, pela calçada rebaixada do lado par",
+  "distanciaMetros": 850,
+  "tempoEstimadoMin": 12,
+  "acessivel": true,
+  "ativa": true
+}
+
+### 3. Listar abrigos (200). Filtros opcionais: ?municipio=São Paulo&apenasComVagas=true
+GET {{base}}/abrigos
+
+### 4. Abrigo por id, com as rotas dele (200)
+GET {{base}}/abrigos/1
+
+### 5. Só as rotas do abrigo 1 (200)
+GET {{base}}/abrigos/1/rotas
+
+### 6. Listar rotas (200). Filtros opcionais: ?abrigoId=1&apenasAcessiveis=true
+GET {{base}}/rotas-evacuacao
+
+### 7. Rota por id (200)
+GET {{base}}/rotas-evacuacao/1
+
+### 8. Atualizar abrigo: chegou mais gente (204)
+PUT {{base}}/abrigos/1
+Content-Type: application/json
+
+{
+  "nome": "EMEF Exemplo do Centro",
+  "endereco": "Rua Exemplo, 100",
+  "bairro": "Centro",
+  "municipio": "São Paulo",
+  "uf": "SP",
+  "capacidade": 250,
+  "ocupacaoAtual": 180,
+  "acessivel": true,
+  "ativo": true,
+  "telefone": "(11) 5555-0100"
+}
+
+### 9. Atualizar rota: trecho alagado, rota desativada (204)
+PUT {{base}}/rotas-evacuacao/1
+Content-Type: application/json
+
+{
+  "abrigoId": 1,
+  "pontoPartida": "Av. do Estado x Rua Mauá",
+  "trajeto": "Rua Mauá até a Rua Exemplo, pela calçada rebaixada do lado par",
+  "distanciaMetros": 850,
+  "tempoEstimadoMin": 12,
+  "acessivel": true,
+  "ativa": false
+}
+
+### ---------- ERROS TRATADOS ----------
+
+### 10. POST inválido: campos vazios e UF errada (400)
+POST {{base}}/abrigos
+Content-Type: application/json
+
+{
+  "nome": "X",
+  "uf": "SPX",
+  "capacidade": 0
+}
+
+### 11. POST inválido: mais gente do que a capacidade (400)
+POST {{base}}/abrigos
+Content-Type: application/json
+
+{
+  "nome": "Ginásio Exemplo",
+  "endereco": "Rua Exemplo, 200",
+  "bairro": "Centro",
+  "municipio": "São Paulo",
+  "uf": "SP",
+  "capacidade": 10,
+  "ocupacaoAtual": 50
+}
+
+### 12. Rota para um abrigo que não existe (400)
+POST {{base}}/rotas-evacuacao
+Content-Type: application/json
+
+{
+  "abrigoId": 999,
+  "pontoPartida": "Ponto qualquer",
+  "trajeto": "Trajeto qualquer",
+  "distanciaMetros": 100,
+  "tempoEstimadoMin": 2
+}
+
+### 13. GET de id inexistente (404)
+GET {{base}}/abrigos/999
+
+### ---------- REMOÇÃO ----------
+
+### 14. Remover rota (204)
+DELETE {{base}}/rotas-evacuacao/1
+
+### 15. Remover abrigo (204). As rotas que sobrarem saem junto (cascade).
+DELETE {{base}}/abrigos/1
